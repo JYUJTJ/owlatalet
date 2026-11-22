@@ -51,7 +51,13 @@
           <aside class="notes-sidebar" id="notesSidebar">
             <div class="notes-list" id="notesList" role="list" aria-label="قائمة ملاحظات الفصل"></div>
           </aside>
-          <article class="markdown-viewer" id="markdownViewer" aria-live="polite"></article>
+          <div class="markdown-column">
+            <div class="note-actions" id="noteActions" hidden>
+              <button type="button" class="note-share-button" id="shareNoteButton">شارك الملحوظة</button>
+              <button type="button" class="note-share-button secondary" id="copyNoteButton">نسخ الرابط</button>
+            </div>
+            <article class="markdown-viewer" id="markdownViewer" aria-live="polite"></article>
+          </div>
         </div>
       </div>
     </section>

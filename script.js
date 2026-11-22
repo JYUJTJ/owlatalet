@@ -705,6 +705,36 @@ function renderInlineMarkdown(value) {
   تأكد من أن تكون العناصر الموجودة في الصفحة متوافقة مع الشيفرة المستخدمة هنا.
 */
 async function discoverMarkdownFiles() {
+  // GitHub Pages لا يوفر قوائم الدلائل، لذا استخدم manifest ثابت أولاً.
+  try {
+    const manifestResponse = await fetch("Markdowns/manifest.json", { cache: "no-store" });
+    if (manifestResponse.ok) {
+      const manifest = await manifestResponse.json();
+      const names = Array.isArray(manifest)
+        ? manifest
+        : Array.isArray(manifest.files) ? manifest.files : [];
+
+      const manifestNotes = names
+        .map(item => typeof item === "string" ? { name: item } : item)
+        .filter(item => typeof item.name === "string" && textFileExtension.test(item.name))
+        .map(item => {
+          const filename = item.name;
+          return {
+            filename,
+            name: item.title || filename.replace(/\.txt$/i, ""),
+            slug: item.slug || "",
+            description: item.description || "ملحوظة مهمة من ملحوظات فصلنا 1\\3",
+            title: item.title || filename.replace(/\.txt$/i, ""),
+            url: `Markdowns/${encodeURI(filename)}`
+          };
+        });
+
+      if (manifestNotes.length) return manifestNotes;
+    }
+  } catch (error) {
+    console.warn("تعذر قراءة manifest للملاحظات:", error);
+  }
+
   try {
     const response = await fetch("Markdowns/", { cache: "no-store" });
     if (!response.ok) return [];
@@ -769,6 +799,118 @@ async function openMarkdownNote(note) {
   }
 }
 
+const noteActions = $("#noteActions");
+const shareNoteButton = $("#shareNoteButton");
+const copyNoteButton = $("#copyNoteButton");
+
+function setSocialMetadata(note) {
+  if (!note) return;
+
+  document.title = `${note.title} | ملحوظات فصلنا 1\\3`;
+
+  const description = document.querySelector('meta[name="description"]');
+  if (description) description.setAttribute("content", note.description);
+
+  const canonicalUrl = new URL(window.location.href);
+  canonicalUrl.searchParams.set("note", note.slug);
+  canonicalUrl.hash = "";
+
+  const tags = {
+    "og:title": `${note.title} | ملحوظات الفصل`,
+    "og:description": note.description,
+    "og:url": canonicalUrl.href,
+    "og:type": "article",
+    "og:site_name": "فصلنا 1\\3",
+    "twitter:card": "summary",
+    "twitter:title": `${note.title} | ملحوظات الفصل`,
+    "twitter:description": note.description
+  };
+
+  Object.entries(tags).forEach(([property, content]) => {
+    let tag = document.querySelector(`meta[property="${property}"]`) || document.querySelector(`meta[name="${property}"]`);
+    if (!tag) {
+      tag = document.createElement("meta");
+      if (property.startsWith("og:") || property === "article:") tag.setAttribute("property", property);
+      else tag.setAttribute("name", property);
+      document.head.appendChild(tag);
+    }
+    tag.setAttribute("content", content);
+  });
+
+  let canonical = document.querySelector('link[rel="canonical"]');
+  if (!canonical) {
+    canonical = document.createElement("link");
+    canonical.rel = "canonical";
+    document.head.appendChild(canonical);
+  }
+  canonical.href = canonicalUrl.href;
+}
+
+function noteShareUrl(note) {
+  const url = new URL(window.location.href);
+  url.pathname = url.pathname.replace(/[^/]*$/, `n/${encodeURIComponent(note.slug)}/`);
+  url.search = "";
+  url.hash = "";
+  return url.href;
+}
+
+async function copyText(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  const input = document.createElement("textarea");
+  input.value = text;
+  input.style.position = "fixed";
+  input.style.opacity = "0";
+  document.body.appendChild(input);
+  input.select();
+  document.execCommand("copy");
+  input.remove();
+}
+
+function showShareFeedback(button, successText) {
+  const original = button.textContent;
+  button.textContent = successText;
+  window.setTimeout(() => { button.textContent = original; }, 1800);
+}
+
+async function shareCurrentNote(note) {
+  if (!note) return;
+  const url = noteShareUrl(note);
+  const shareData = { title: note.title, text: note.description, url };
+
+  try {
+    if (navigator.share) {
+      await navigator.share(shareData);
+    } else {
+      await copyText(url);
+      showShareFeedback(shareNoteButton, "اتنسخ الرابط ✓");
+    }
+  } catch (error) {
+    if (error.name !== "AbortError") {
+      console.warn("تعذر مشاركة الملحوظة:", error);
+      await copyText(url);
+      showShareFeedback(shareNoteButton, "اتنسخ الرابط ✓");
+    }
+  }
+}
+
+if (shareNoteButton) shareNoteButton.addEventListener("click", () => {
+  if (window.activeSharedNote) shareCurrentNote(window.activeSharedNote);
+});
+
+if (copyNoteButton) copyNoteButton.addEventListener("click", async () => {
+  if (!window.activeSharedNote) return;
+  try {
+    await copyText(noteShareUrl(window.activeSharedNote));
+    showShareFeedback(copyNoteButton, "اتنسخ ✓");
+  } catch (error) {
+    console.warn("تعذر نسخ الرابط:", error);
+  }
+});
+
 if (notesEmpty && notesBrowser) {
   discoverMarkdownFiles().then(notes => {
     if (!notes.length) {
@@ -779,6 +921,26 @@ if (notesEmpty && notesBrowser) {
 
     notesEmpty.hidden = true;
     notesBrowser.hidden = false;
+
+    if (noteActions) noteActions.hidden = false;
+
+    const selectNote = (note, index, updateUrl = true) => {
+      window.activeSharedNote = note;
+      setSocialMetadata(note);
+      openMarkdownNote(note);
+
+      $$(".notes-list-item", notesList).forEach((button, buttonIndex) => {
+        const active = buttonIndex === index;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+
+      if (updateUrl) {
+        const url = new URL(window.location.href);
+        url.searchParams.set("note", note.slug);
+        window.history.replaceState({}, "", url);
+      }
+    };
 
     if (notes.length === 1) {
       if (notesSidebar) notesSidebar.hidden = true;
@@ -795,18 +957,14 @@ if (notesEmpty && notesBrowser) {
         notesList.addEventListener("click", event => {
           const item = event.target.closest("[data-note-index]");
           if (!item) return;
-
-          const index = Number(item.dataset.noteIndex);
-          $$(".notes-list-item", notesList).forEach(button => {
-            const active = button === item;
-            button.classList.toggle("active", active);
-            button.setAttribute("aria-pressed", String(active));
-          });
-          openMarkdownNote(notes[index]);
+          selectNote(notes[Number(item.dataset.noteIndex)], Number(item.dataset.noteIndex));
         });
       }
     }
 
-    openMarkdownNote(notes[0]);
+    const requestedSlug = new URL(window.location.href).searchParams.get("note");
+    const requestedIndex = notes.findIndex(note => note.slug === requestedSlug);
+    const initialIndex = requestedIndex >= 0 ? requestedIndex : 0;
+    selectNote(notes[initialIndex], initialIndex);
   });
 }
