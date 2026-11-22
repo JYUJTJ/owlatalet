@@ -1,9 +1,5 @@
-/*
-  غيّر الأسماء والمقولات هنا فقط لتخصيص الديمو.
-  استبدل عناصر "اسم الطالب" بأسماء زملائك بعد أخذ موافقتهم.
-*/
+
 const STUDENTS = [
-  // العمود الأول (من 1 إلى 30):
   "عمرو احمد محمد عبد العال",
   "عكاشة احمد عكاشة عباس",
   "على بخيت سليمان على المنعم",
@@ -35,7 +31,6 @@ const STUDENTS = [
   "محمد الامير ابو الحمد السيد",
   "محمد البدرى ابو السعود عبد المبدى",
 
-  // العمود الثاني (من 31 إلى 50):
   "محمد حربى محمد عبد الغنى",
   "محمد حسن احمد عبد اللطيف",
   "محمد حمدون عطيت الله على",
@@ -69,7 +64,6 @@ const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").match
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 
-// بناء بطاقات أسماء الطلاب من المصفوفة الموجودة أعلى الملف.
 const studentsList = $("#studentsList");
 if (studentsList) {
   studentsList.innerHTML = STUDENTS.map((name, index) => {
@@ -112,7 +106,6 @@ function escapeHTML(value) {
   })[char]);
 }
 
-// قائمة المقولات وأزرار التنقل بينها.
 let quoteIndex = 0;
 const quoteElement = $("#rotatingQuote");
 const dotsElement = $("#quoteDots");
@@ -155,7 +148,6 @@ function restartQuoteTimer() {
 showQuote(0, false);
 restartQuoteTimer();
 
-// قائمة الهاتف.
 const menuToggle = $("#menuToggle");
 const mainNav = $(".main-nav");
 if (menuToggle && mainNav) {
@@ -169,7 +161,6 @@ if (menuToggle && mainNav) {
   }));
 }
 
-// شريط يوضح موضع التمرير.
 const progressBar = $("#progressBar");
 function updateProgress() {
   const scrollable = document.documentElement.scrollHeight - window.innerHeight;
@@ -179,7 +170,6 @@ function updateProgress() {
 window.addEventListener("scroll", updateProgress, { passive: true });
 updateProgress();
 
-// تأثيرات الظهور: GSAP عند توفر المكتبة، وIntersectionObserver كبديل.
 function setupRevealAnimations() {
   document.body.classList.add("js-ready");
   const revealItems = $$(".reveal");
@@ -223,7 +213,6 @@ function setupRevealAnimations() {
   }
 }
 
-// جسيمات ذهبية تتحرك باستمرار في الخلفية.
 async function setupParticles() {
   const holder = $("#tsparticles");
   if (!holder || reduceMotion || !window.tsParticles || !window.loadSlim) return;
@@ -257,7 +246,6 @@ async function setupParticles() {
   }
 }
 
-// ميل خفيف لصورة الواجهة مع المؤشر على الأجهزة التي تدعم ذلك.
 const heroFrame = $(".hero-image-frame");
 if (heroFrame && window.matchMedia("(pointer:fine)").matches && !reduceMotion) {
   let frame = 0;
@@ -275,7 +263,6 @@ if (heroFrame && window.matchMedia("(pointer:fine)").matches && !reduceMotion) {
   });
 }
 
-// فتح الصور في نافذة مكبرة.
 const lightbox = $("#lightbox");
 const lightboxImage = $("#lightboxImage");
 const lightboxClose = $("#lightboxClose");
@@ -298,7 +285,6 @@ if (lightboxClose) lightboxClose.addEventListener("click", closeLightbox);
 if (lightbox) lightbox.addEventListener("click", event => { if (event.target === lightbox) closeLightbox(); });
 window.addEventListener("keydown", event => { if (event.key === "Escape") closeLightbox(); });
 
-// معرض صور الفصل من مجلد imgs.
 const albumImages = [
   { src: "imgs/baner.png", alt: "لحظة من نشاط الفصل" },
   { src: "imgs/untitled-f000936.png", alt: "صورة من ألبوم الفصل" },
