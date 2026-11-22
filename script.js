@@ -65,6 +65,36 @@ const QUOTES = [
   "اختلافنا مش مشكلة؛ ده اللي مخلي الشلة دي شكلها حلو."
 ];
 
+// أضف صور الألبوم هنا فقط: المسار والنص البديل.
+const ALBUM_IMAGES = [
+  { src: "imgs/baner.png", alt: "صورة من ألبوم الفصل: بانر" },
+  { src: "imgs/untitled-f000936.png", alt: "صورة من ألبوم الفصل: ذكرى 936" },
+  { src: "imgs/untitled-f001067.png", alt: "صورة من ألبوم الفصل: ذكرى 1067" },
+  { src: "imgs/untitled-f001184.png", alt: "صورة من ألبوم الفصل: ذكرى 1184" }
+];
+
+// أضف الملاحظات هنا فقط: اسم الملف، العنوان، الوصف، والمسار الخاص بالمشاركة.
+const MARKDOWN_NOTES = [
+  {
+    filename: "تنبيه بخصوص الاذاعه.txt",
+    name: "إذاعة يوم الأربعاء",
+    title: "إذاعة يوم الأربعاء",
+    description: "الموضوع المقترح للإذاعة هو الفلسفة، وأهميتها وأسئلة يمكن أن تشعل النقاش.",
+    slug: "radio-announcement",
+    sharePath: "n/radio-announcement/",
+    url: "Markdowns/تنبيه بخصوص الاذاعه.txt"
+  },
+  {
+    filename: "حافظ علي الفصل.txt",
+    name: "حافظ على الفصل",
+    title: "حافظ على الفصل",
+    description: "ملحوظة مهمة للحفاظ على نظافة الفصل وترتيبه ومسؤولية كل طالب فيه.",
+    slug: "keep-the-classroom",
+    sharePath: "n/keep-the-classroom/",
+    url: "Markdowns/حافظ علي الفصل.txt"
+  }
+];
+
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -302,57 +332,10 @@ window.addEventListener("keydown", event => { if (event.key === "Escape") closeL
 const imageExtensions = /\.(avif|gif|jpe?g|png|webp)$/i;
 
 async function discoverAlbumImages() {
-  try {
-    const response = await fetch("imgs/", { cache: "no-store" });
-    if (response.ok) {
-      const contentType = response.headers.get("content-type") || "";
-      const text = await response.text();
-
-      // تتعامل الخوادم البسيطة (مثل python -m http.server) مع المجلد كصفحة HTML.
-      if (contentType.includes("text/html") || /^\s*<!doctype html/i.test(text) || /^\s*<html/i.test(text)) {
-        const directoryDocument = new DOMParser().parseFromString(text, "text/html");
-        return [...directoryDocument.querySelectorAll("a")]
-          .map(link => new URL(link.href, response.url))
-          .filter(url => imageExtensions.test(url.pathname))
-          .map(url => ({
-            src: `imgs/${encodeURI(decodeURIComponent(url.pathname.split("/").pop()))}`,
-            alt: imageNameToAlt(decodeURIComponent(url.pathname.split("/").pop()))
-          }));
-      }
-
-      // كما يدعم هذا المنطق خدمات ترجع JSON أو مصفوفة أسماء ضمن استجابة المجلد.
-      try {
-        const listing = JSON.parse(text);
-        const names = Array.isArray(listing)
-          ? listing
-          : Array.isArray(listing.files) ? listing.files : [];
-        return names
-          .map(item => typeof item === "string" ? item : item.name)
-          .filter(name => typeof name === "string" && imageExtensions.test(name))
-          .map(name => ({ src: `imgs/${encodeURI(name)}`, alt: imageNameToAlt(name) }));
-      } catch (_error) {
-        // استمر إلى ملف manifest الاحتياطي إن كان موجودًا.
-      }
-    }
-  } catch (_error) {
-    // استمر إلى ملف manifest الاحتياطي.
-  }
-
-  // fallback اختياري للخوادم التي لا تعرض محتوى المجلد، مع استكمال جلب manifest.json.
-  try {
-    const response = await fetch("imgs/manifest.json", { cache: "no-store" });
-    if (!response.ok) return [];
-    const manifest = await response.json();
-    const names = Array.isArray(manifest)
-      ? manifest
-      : Array.isArray(manifest.files) ? manifest.files : [];
-    return names
-      .map(item => typeof item === "string" ? item : item.name)
-      .filter(name => typeof name === "string" && imageExtensions.test(name))
-      .map(name => ({ src: `imgs/${encodeURI(name)}`, alt: imageNameToAlt(name) }));
-  } catch (_error) {
-    return [];
-  }
+  return ALBUM_IMAGES.map(image => ({
+    src: image.src,
+    alt: image.alt || imageNameToAlt(image.src.split("/").pop())
+  }));
 }
 
 function imageNameToAlt(filename) {
@@ -705,75 +688,15 @@ function renderInlineMarkdown(value) {
   تأكد من أن تكون العناصر الموجودة في الصفحة متوافقة مع الشيفرة المستخدمة هنا.
 */
 async function discoverMarkdownFiles() {
-  // GitHub Pages لا يوفر قوائم الدلائل، لذا استخدم manifest ثابت أولاً.
-  try {
-    const manifestResponse = await fetch("Markdowns/manifest.json", { cache: "no-store" });
-    if (manifestResponse.ok) {
-      const manifest = await manifestResponse.json();
-      const names = Array.isArray(manifest)
-        ? manifest
-        : Array.isArray(manifest.files) ? manifest.files : [];
-
-      const manifestNotes = names
-        .map(item => typeof item === "string" ? { name: item } : item)
-        .filter(item => typeof item.name === "string" && textFileExtension.test(item.name))
-        .map(item => {
-          const filename = item.name;
-          return {
-            filename,
-            name: item.title || filename.replace(/\.txt$/i, ""),
-            slug: item.slug || "",
-            description: item.description || "ملحوظة مهمة من ملحوظات فصلنا 1\\3",
-            title: item.title || filename.replace(/\.txt$/i, ""),
-            url: `Markdowns/${encodeURI(filename)}`
-          };
-        });
-
-      if (manifestNotes.length) return manifestNotes;
-    }
-  } catch (error) {
-    console.warn("تعذر قراءة manifest للملاحظات:", error);
-  }
-
-  try {
-    const response = await fetch("Markdowns/", { cache: "no-store" });
-    if (!response.ok) return [];
-
-    const contentType = response.headers.get("content-type") || "";
-    const text = await response.text();
-
-    if (contentType.includes("text/html") || /^\s*<!doctype html/i.test(text) || /^\s*<html/i.test(text)) {
-      const directoryDocument = new DOMParser().parseFromString(text, "text/html");
-      return [...directoryDocument.querySelectorAll("a")]
-        .map(link => new URL(link.href, response.url))
-        .filter(url => textFileExtension.test(decodeURIComponent(url.pathname)))
-        .map(url => {
-          const filename = decodeURIComponent(url.pathname.split("/").pop());
-          return {
-            filename,
-            name: filename.replace(/\.txt$/i, ""),
-            url: `Markdowns/${encodeURI(filename)}`
-          };
-        });
-    }
-
-    const listing = JSON.parse(text);
-    const names = Array.isArray(listing)
-      ? listing
-      : Array.isArray(listing.files) ? listing.files : [];
-
-    return names
-      .map(item => typeof item === "string" ? item : item.name)
-      .filter(name => typeof name === "string" && textFileExtension.test(name))
-      .map(filename => ({
-        filename,
-        name: filename.replace(/\.txt$/i, ""),
-        url: `Markdowns/${encodeURI(filename)}`
-      }));
-  } catch (error) {
-    console.warn("تعذر فحص مجلد الملاحظات:", error);
-    return [];
-  }
+  return MARKDOWN_NOTES.map(note => ({
+    filename: note.filename,
+    name: note.name,
+    title: note.title,
+    description: note.description,
+    slug: note.slug,
+    sharePath: note.sharePath,
+    url: note.url
+  }));
 }
 
 const notesEmpty = $("#notesEmpty");
@@ -848,7 +771,7 @@ function setSocialMetadata(note) {
 
 function noteShareUrl(note) {
   const url = new URL(window.location.href);
-  url.pathname = url.pathname.replace(/[^/]*$/, `n/${encodeURIComponent(note.slug)}/`);
+  url.pathname = url.pathname.replace(/[^/]*$/, note.sharePath);
   url.search = "";
   url.hash = "";
   return url.href;
