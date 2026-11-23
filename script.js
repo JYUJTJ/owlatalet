@@ -1,9 +1,4 @@
-/*
-  غيّر الأسماء والمقولات هنا فقط لتخصيص الديمو.
-  استبدل عناصر "اسم الطالب" بأسماء زملائك بعد أخذ موافقتهم.
-*/
 const STUDENTS = [
-  // العمود الأول (من 1 إلى 30):
   "عمرو احمد محمد عبد العال",
   "عكاشة احمد عكاشة عباس",
   "على بخيت سليمان على المنعم",
@@ -35,7 +30,6 @@ const STUDENTS = [
   "محمد الامير ابو الحمد السيد",
   "محمد البدرى ابو السعود عبد المبدى",
 
-  // العمود الثاني (من 31 إلى 50):
   "محمد حربى محمد عبد الغنى",
   "محمد حسن احمد عبد اللطيف",
   "محمد حمدون عطيت الله على",
@@ -65,7 +59,6 @@ const QUOTES = [
   "اختلافنا مش مشكلة؛ ده اللي مخلي الشلة دي شكلها حلو."
 ];
 
-// أضف صور الألبوم هنا فقط: المسار والنص البديل.
 const ALBUM_IMAGES = [
   { src: "imgs/baner.png", alt: "صورة من ألبوم الفصل: بانر" },
   { src: "imgs/untitled-f000936.png", alt: "صورة من ألبوم الفصل: ذكرى " },
@@ -79,8 +72,6 @@ const ALBUM_IMAGES = [
   { src: "imgs/6.jpeg", alt: "صورة من ألبوم الفصل: ذكرى " },
   { src: "imgs/7.jpeg", alt: "صورة من ألبوم الفصل: ذكرى " }
 ];
-
-// أضف الملاحظات هنا فقط: اسم الملف، العنوان، الوصف، والمسار الخاص بالمشاركة.
 const MARKDOWN_NOTES = [
   {
     filename: "تنبيه بخصوص الاذاعه.txt",
@@ -245,6 +236,46 @@ function setupRevealAnimations() {
       opacity: 1, y: 0, duration: 0.5, stagger: 0.055, ease: "power2.out",
       scrollTrigger: { trigger: ".students-list", start: "top 82%", once: true }
     });
+    // دخول كامل وفخم لقسم القيادة عند ظهوره في الشاشة.
+    gsap.timeline({
+      scrollTrigger: { trigger: ".leadership", start: "top 82%", once: true }
+    })
+      .fromTo(".leadership", { opacity: 0, scale: 0.94, y: 45, clipPath: "inset(8% 12% 8% 12% round 18px)" }, {
+        opacity: 1, scale: 1, y: 0, clipPath: "inset(0% 0% 0% 0% round 18px)", duration: 1.05, ease: "power3.out"
+      })
+      .fromTo(".leadership .section-heading", { opacity: 0, y: 28, letterSpacing: "4px" }, {
+        opacity: 1, y: 0, letterSpacing: "0px", duration: 0.75, ease: "power2.out",
+        delay: -0.65
+      })
+      .fromTo(".leadership-flag-bg", { opacity: 0, scale: 1.12 }, {
+        opacity: 0.18, scale: 1, duration: 1.2, ease: "power2.out",
+        delay: -0.9
+      })
+      .fromTo(".leader-card", { opacity: 0, y: 65, rotateY: 8, scale: 0.92 }, {
+        opacity: 1, y: 0, rotateY: 0, scale: 1, duration: 0.9, stagger: 0.18, ease: "back.out(1.25)",
+        delay: -0.75
+      })
+      .fromTo(".leader-frame img", { scale: 1.12, filter: "saturate(.55) brightness(.75)" }, {
+        scale: 1, filter: "saturate(.9) contrast(1.05)", duration: 1.15, stagger: 0.12, ease: "power2.out",
+        delay: -0.65
+      })
+      .fromTo(".leader-info", { opacity: 0, y: 18 }, {
+        opacity: 1, y: 0, duration: 0.55, stagger: 0.14, ease: "power2.out",
+        delay: -0.72
+      })
+      .fromTo(".leader-seal", { opacity: 0, scale: 0, rotation: -90 }, {
+        opacity: 1, scale: 1, rotation: 0, duration: 0.55, stagger: 0.12, ease: "back.out(2)",
+        delay: -0.45
+      });
+
+    gsap.to(".leadership-flag-bg", {
+      yPercent: 8,
+      scale: 1.06,
+      ease: "none",
+      scrollTrigger: { trigger: ".leadership", start: "top bottom", end: "bottom top", scrub: 1.2 }
+    });
+    gsap.fromTo(".leader-card:first-child", { x: -38 }, { x: 0, ease: "none", scrollTrigger: { trigger: ".leadership", start: "top 90%", end: "top 35%", scrub: 1 } });
+    gsap.fromTo(".leader-card:last-child", { x: 38 }, { x: 0, ease: "none", scrollTrigger: { trigger: ".leadership", start: "top 90%", end: "top 35%", scrub: 1 } });
   } else {
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
@@ -291,6 +322,20 @@ async function setupParticles() {
     });
   } catch (error) {
     console.warn("تعذر تحميل جسيمات الخلفية. ستظل بقية الصفحة تعمل.", error);
+  }
+}
+
+// جسيمات احتياطية إذا تعذر تحميل tsParticles.
+if (!reduceMotion && typeof window.tsParticles === "undefined") {
+  const holder = $("#tsparticles");
+  if (holder) {
+    holder.innerHTML = Array.from({ length: window.innerWidth < 700 ? 18 : 36 }, (_, index) => {
+      const size = 2 + (index % 4);
+      const duration = 12 + (index % 9) * 2;
+      const delay = -(index % 11) * 1.7;
+      const drift = ((index % 7) - 3) * 24;
+      return `<i class="gold-particle" style="--x:${(index * 37) % 100}%;--size:${size}px;--duration:${duration}s;--delay:${delay}s;--drift:${drift}px;--opacity:${0.18 + (index % 5) * 0.1}"></i>`;
+    }).join("");
   }
 }
 
@@ -356,6 +401,8 @@ if (albumGallery) {
   let albumIndex = 0;
   const albumCards = $$(".album-card", albumGallery);
   const albumDots = $("#albumDots", albumGallery);
+  const albumStage = $("#albumStage", albumGallery);
+  let isAlbumAnimating = false;
 
   const normalizeIndex = index => albumImages.length
     ? (index + albumImages.length) % albumImages.length
@@ -408,9 +455,61 @@ if (albumGallery) {
   }
 
   function changeAlbum(direction) {
-    if (!albumImages.length) return;
-    albumIndex = normalizeIndex(albumIndex + direction);
-    renderAlbum();
+    if (!albumImages.length || isAlbumAnimating) return;
+
+    if (reduceMotion || !window.gsap) {
+      albumIndex = normalizeIndex(albumIndex + direction);
+      renderAlbum(true);
+      return;
+    }
+
+    isAlbumAnimating = true;
+    const cards = albumCards;
+
+    gsap.timeline({
+      onComplete: () => {
+        isAlbumAnimating = false;
+        cards.forEach(card => card.classList.remove("album-flipping"));
+      }
+    })
+      .set(cards, { transformPerspective: 1400 })
+      .to(albumStage, {
+        x: direction * 10,
+        rotateY: direction * -4,
+        scale: .985,
+        duration: .28,
+        ease: "power2.in"
+      })
+      .to(cards, {
+        rotateY: direction * 72,
+        rotateZ: direction * 1.2,
+        scale: .94,
+        opacity: .25,
+        duration: .42,
+        ease: "power2.in",
+        stagger: .035
+      }, "<")
+      .call(() => {
+        albumIndex = normalizeIndex(albumIndex + direction);
+        renderAlbum(false);
+      })
+      .set(cards, { rotateY: direction * -72 })
+      .to(cards, {
+        rotateY: 0,
+        rotateZ: 0,
+        scale: 1,
+        opacity: 1,
+        duration: .58,
+        ease: "back.out(1.45)",
+        stagger: .055
+      })
+      .to(albumStage, {
+        x: 0,
+        rotateY: 0,
+        scale: 1,
+        duration: .48,
+        ease: "power3.out"
+      }, "-=.52");
   }
 
   const albumPrev = $(".album-prev", albumGallery);
@@ -421,8 +520,12 @@ if (albumGallery) {
   albumGallery.addEventListener("click", event => {
     const dot = event.target.closest("[data-album-index]");
     if (dot) {
-      albumIndex = normalizeIndex(Number(dot.dataset.albumIndex));
-      renderAlbum();
+      const targetIndex = normalizeIndex(Number(dot.dataset.albumIndex));
+      if (targetIndex === albumIndex) return;
+
+      const forwardDistance = normalizeIndex(targetIndex - albumIndex);
+      const backwardDistance = normalizeIndex(albumIndex - targetIndex);
+      changeAlbum(forwardDistance <= backwardDistance ? 1 : -1);
       return;
     }
 
@@ -433,7 +536,9 @@ if (albumGallery) {
   });
 
   let swipeStartX = 0;
-  albumGallery.addEventListener("touchstart", event => { swipeStartX = event.changedTouches[0].clientX; }, { passive: true });
+  albumGallery.addEventListener("touchstart", event => {
+    swipeStartX = event.changedTouches[0].clientX;
+  }, { passive: true });
   albumGallery.addEventListener("touchend", event => {
     const distance = event.changedTouches[0].clientX - swipeStartX;
     if (Math.abs(distance) > 45) changeAlbum(distance > 0 ? -1 : 1);
@@ -459,442 +564,373 @@ if (albumGallery) {
   });
 }
 
-// ملاحظات الفصل: يفحص مجلد Markdowns ويعرض ملفات TXT كصفحات Markdown.
-const textFileExtension = /\.txt$/i;
+// حركة وطنية بسيطة ومبهرة لبطاقات المدير والوكيل عند تمرير المؤشر.
+const leaderCards = $$(".leader-card");
+leaderCards.forEach(card => {
+  if (reduceMotion) return;
 
-function markdownToHTML(markdown) {
-  const source = markdown.replace(/\r\n?/g, "\n");
+  card.addEventListener("pointermove", event => {
+    if (!window.matchMedia("(pointer:fine)").matches) return;
+    const rect = card.getBoundingClientRect();
+    const x = (event.clientX - rect.left) / rect.width - 0.5;
+    const y = (event.clientY - rect.top) / rect.height - 0.5;
 
-  const isHorizontalRule = line => /^ {0,3}(?:\*\s*){3,}$/.test(line) || /^ {0,3}(?:-\s*){3,}$/.test(line) || /^ {0,3}(?:_\s*){3,}$/.test(line);
-
-  function parseList(lines, start) {
-    const first = lines[start];
-    const baseMatch = first.match(/^([ \t]*)([-+*]|\d+[.)])\s+(.+)$/);
-    if (!baseMatch) return { html: "", next: start };
-
-    const baseIndent = baseMatch[1].length;
-    const ordered = /^\d+[.)]/.test(baseMatch[2]);
-    const tag = ordered ? "ol" : "ul";
-    let html = `<${tag}>`;
-    let index = start;
-
-    while (index < lines.length) {
-      const match = lines[index].match(/^([ \t]*)([-+*]|\d+[.)])\s+(.+)$/);
-      if (!match || match[1].length !== baseIndent) break;
-      const sameOrdered = /^\d+[.)]/.test(match[2]);
-      if ((sameOrdered ? "ol" : "ul") !== tag) break;
-
-      let item = renderInlineMarkdown(match[3]);
-      const task = item.match(/^\[([ xX])\]\s*(.*)$/);
-      if (task) {
-        const checked = task[1].toLowerCase() === "x";
-        item = `<label class="task-item"><input type="checkbox" disabled${checked ? " checked" : ""}><span>${task[2]}</span></label>`;
-      }
-      index++;
-
-      let nestedLines = [];
-      while (index < lines.length) {
-        const indentMatch = lines[index].match(/^([ \t]*)/);
-        const indent = indentMatch ? indentMatch[1].length : 0;
-        if (indent > baseIndent && lines[index].trim()) {
-          nestedLines.push(lines[index].slice(indent));
-          index++;
-        } else {
-          break;
-        }
-      }
-
-      if (nestedLines.length) {
-        item += parseBlocks(nestedLines).html;
-      }
-      html += `<li>${item}</li>`;
-
-      if (index < lines.length && lines[index].trim()) {
-        const nextMatch = lines[index].match(/^([ \t]*)([-+*]|\d+[.)])\s+/);
-        if (!nextMatch || nextMatch[1].length !== baseIndent) break;
-      }
-    }
-
-    html += `</${tag}>`;
-    return { html, next: index };
-  }
-
-  function parseTable(lines, start) {
-    if (start + 1 >= lines.length) return null;
-    const header = lines[start].trim();
-    const divider = lines[start + 1].trim();
-    if (!header.includes("|") || !/^\s*\|?\s*:?-{3,}:?(?:\s*\|\s*:?-{3,}:?)+\s*\|?\s*$/.test(divider)) return null;
-
-    const splitRow = row => row.replace(/^\s*\|/, "").replace(/\|\s*$/, "").split("|").map(cell => cell.trim());
-    const headers = splitRow(header);
-    const aligns = splitRow(divider).map(cell => {
-      if (/^:\s*-.*:$/.test(cell)) return "center";
-      if (/^-.*:$/.test(cell)) return "right";
-      if (/^:/.test(cell)) return "left";
-      return null;
-    });
-
-    let html = "<table><thead><tr>";
-    headers.forEach((cell, i) => {
-      const style = aligns[i] ? ` style="text-align:${aligns[i]}"` : "";
-      html += `<th${style}>${renderInlineMarkdown(cell)}</th>`;
-    });
-    html += "</tr></thead><tbody>";
-
-    let index = start + 2;
-    while (index < lines.length && lines[index].includes("|")) {
-      const cells = splitRow(lines[index]);
-      html += "<tr>";
-      headers.forEach((_, i) => {
-        const style = aligns[i] ? ` style="text-align:${aligns[i]}"` : "";
-        html += `<td${style}>${renderInlineMarkdown(cells[i] || "")}</td>`;
+    if (window.gsap) {
+      gsap.to(card, {
+        y: -7,
+        rotateX: -y * 2.5,
+        rotateY: x * 2.5,
+        duration: 0.35,
+        ease: "power2.out",
+        overwrite: "auto"
       });
-      html += "</tr>";
-      index++;
-    }
-    html += "</tbody></table>";
-    return { html, next: index };
-  }
 
-  function parseBlocks(lines) {
-    let html = "";
-    let index = 0;
-
-    while (index < lines.length) {
-      const line = lines[index];
-
-      if (!line.trim()) {
-        index++;
-        continue;
-      }
-
-      const fence = line.match(/^ {0,3}(`{3,}|~{3,})([^`]*)$/);
-      if (fence) {
-        const marker = fence[1][0];
-        const language = fence[2].trim().split(/\s+/)[0] || "";
-        index++;
-        const codeLines = [];
-        while (index < lines.length && !new RegExp(`^ {0,3}${marker}{3,}\\s*$`).test(lines[index])) {
-          codeLines.push(lines[index]);
-          index++;
-        }
-        if (index < lines.length) index++;
-        const languageClass = language ? ` class="language-${escapeHTML(language)}"` : "";
-        html += `<pre><code${languageClass}>${escapeHTML(codeLines.join("\n"))}</code></pre>`;
-        continue;
-      }
-
-      if (/^(?: {4}|\t)/.test(line)) {
-        const codeLines = [];
-        while (index < lines.length && /^(?: {4}|\t)/.test(lines[index])) {
-          codeLines.push(lines[index].replace(/^(?: {4}|\t)/, ""));
-          index++;
-        }
-        html += `<pre><code>${escapeHTML(codeLines.join("\n"))}</code></pre>`;
-        continue;
-      }
-
-      if (isHorizontalRule(line)) {
-        html += "<hr>";
-        index++;
-        continue;
-      }
-
-      const heading = line.match(/^ {0,3}(#{1,6})\s*(.*?)\s*#*\s*$/);
-      if (heading) {
-        const level = heading[1].length;
-        html += `<h${level}>${renderInlineMarkdown(heading[2])}</h${level}>`;
-        index++;
-        continue;
-      }
-
-      if (index + 1 < lines.length && /^ {0,3}(=+|-+)\s*$/.test(lines[index + 1])) {
-        const level = /^=+/.test(lines[index + 1].trim()) ? 1 : 2;
-        html += `<h${level}>${renderInlineMarkdown(line.trim())}</h${level}>`;
-        index += 2;
-        continue;
-      }
-
-      if (/^ {0,3}>/.test(line)) {
-        const quoteLines = [];
-        while (index < lines.length && /^ {0,3}>/.test(lines[index])) {
-          quoteLines.push(lines[index].replace(/^ {0,3}> ?/, ""));
-          index++;
-        }
-        html += `<blockquote>${parseBlocks(quoteLines).html}</blockquote>`;
-        continue;
-      }
-
-      const table = parseTable(lines, index);
-      if (table) {
-        html += table.html;
-        index = table.next;
-        continue;
-      }
-
-      if (/^ {0,3}(?:[-+*]|\d+[.)])\s+/.test(line)) {
-        const list = parseList(lines, index);
-        html += list.html;
-        index = list.next;
-        continue;
-      }
-
-      const paragraph = [];
-      while (index < lines.length) {
-        const current = lines[index];
-        if (!current.trim()) break;
-        if (/^ {0,3}(?:#{1,6}\s|>|```|~~~|(?:[-+*]|\d+[.)])\s+)/.test(current)) break;
-        if (isHorizontalRule(current) || /^ {0,3}(=+|-+)\s*$/.test(current)) break;
-        if (index + 1 < lines.length && /^ {0,3}(=+|-+)\s*$/.test(lines[index + 1])) break;
-        if (parseTable(lines, index)) break;
-        paragraph.push(current);
-        index++;
-      }
-
-      if (paragraph.length) {
-        const paragraphText = paragraph.join("\n").replace(/ {2}$/gm, "<br>");
-        html += `<p>${renderInlineMarkdown(paragraphText)}</p>`;
+      const flag = card.closest(".leadership")?.querySelector(".leadership-flag-bg");
+      if (flag) {
+        gsap.to(flag, {
+          x: x * 8,
+          y: y * 5,
+          duration: 0.6,
+          ease: "power2.out",
+          overwrite: "auto"
+        });
       }
     }
+  });
 
-    return { html };
-  }
+  card.addEventListener("pointerleave", () => {
+    if (!window.gsap) return;
 
-  return parseBlocks(source.split("\n")).html;
+    gsap.to(card, {
+      y: 0,
+      rotateX: 0,
+      rotateY: 0,
+      duration: 0.55,
+      ease: "power3.out",
+      overwrite: "auto"
+    });
+
+    const flag = card.closest(".leadership")?.querySelector(".leadership-flag-bg");
+    if (flag) {
+      gsap.to(flag, {
+        x: 0,
+        y: 0,
+        duration: 0.75,
+        ease: "power3.out",
+        overwrite: "auto"
+      });
+    }
+  });
+});
+
+// تفاعل بصري عام لكل أقسام الصفحة عند دخولها الشاشة وخلال التمرير.
+if (window.gsap && window.ScrollTrigger && document.querySelector("main > section")) {
+  gsap.registerPlugin(ScrollTrigger);
+
+  gsap.utils.toArray("main > section:not(.hero)").forEach((section, sectionIndex) => {
+    const heading = $(".section-heading", section);
+    const leftSide = $(".story-photo, .video-copy", section);
+    const rightSide = $(".story-text, .video-frame", section);
+
+    gsap.timeline({
+      scrollTrigger: {
+        trigger: section,
+        start: "top 84%",
+        once: true
+      }
+    })
+      .fromTo(section, { opacity: 0.2, y: 28 }, {
+        opacity: 1,
+        y: 0,
+        duration: 0.9,
+        ease: "power2.out"
+      });
+
+    if (heading) {
+      gsap.fromTo(heading, { opacity: 0, y: 24, scale: 0.96 }, {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.75,
+        ease: "power3.out",
+        scrollTrigger: { trigger: section, start: "top 84%", once: true }
+      });
+    }
+
+    if (leftSide) {
+      gsap.fromTo(leftSide, { opacity: 0, x: -45, rotateY: 4 }, {
+        opacity: 1,
+        x: 0,
+        rotateY: 0,
+        duration: 0.95,
+        ease: "power3.out",
+        scrollTrigger: { trigger: leftSide, start: "top 88%", once: true }
+      });
+    }
+
+    if (rightSide) {
+      gsap.fromTo(rightSide, { opacity: 0, x: 45, rotateY: -4 }, {
+        opacity: 1,
+        x: 0,
+        rotateY: 0,
+        duration: 0.95,
+        ease: "power3.out",
+        scrollTrigger: { trigger: rightSide, start: "top 88%", once: true }
+      });
+    }
+
+    gsap.to(section, {
+      y: sectionIndex % 2 === 0 ? -12 : 12,
+      ease: "none",
+      scrollTrigger: {
+        trigger: section,
+        start: "top bottom",
+        end: "bottom top",
+        scrub: 1.4
+      }
+    });
+  });
+
+  gsap.utils.toArray(".story-values > div, .album-card, .closing-card, .student-name").forEach((item, index) => {
+    gsap.fromTo(item, { opacity: 0, y: 28, scale: 0.94 }, {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      duration: 0.65,
+      delay: (index % 4) * 0.06,
+      ease: "back.out(1.15)",
+      scrollTrigger: { trigger: item, start: "top 90%", once: true }
+    });
+  });
 }
 
-function renderInlineMarkdown(value) {
-  const escaped = escapeHTML(value);
-  const placeholders = [];
-  const stash = text => `\u0000${placeholders.push(text) - 1}\u0000`;
+// تشغيل التأثيرات العامة والجسيمات بعد اكتمال تحميل محتوى الصفحة.
+if (document.querySelector("main > section#home")) {
+  setupRevealAnimations();
+}
+setupParticles();
 
-  let html = escaped
-    .replace(/!\[([^\]]*)\]\(([^\s)]+)(?:\s+["']([^"']*)["'])?\)/g, (_, alt, url, title) =>
-      stash(`<img src="${escapeHTML(url)}" alt="${escapeHTML(alt)}"${title ? ` title="${escapeHTML(title)}"` : ""}>`))
-    .replace(/\[([^\]]+)\]\(([^\s)]+)(?:\s+["']([^"']*)["'])?\)/g, (_, text, url, title) =>
-      stash(`<a href="${escapeHTML(url)}"${title ? ` title="${escapeHTML(title)}"` : ""} target="${/^https?:\/\//.test(url) ? "_blank" : "_self"}" rel="noopener noreferrer">${text}</a>`))
-    .replace(/<(https?:\/\/[^>]+)>/g, (_, url) => stash(`<a href="${escapeHTML(url)}" target="_blank" rel="noopener noreferrer">${escapeHTML(url)}</a>`));
+if (window.ScrollTrigger) {
+  window.ScrollTrigger.refresh();
+}
 
-  html = html.replace(/`([^`]+)`/g, (_, code) => stash(`<code>${escapeHTML(code)}</code>`));
-  html = html.replace(/~~~([^~]+)~~~/g, "<del>$1</del>");
-  html = html.replace(/~~([^~]+)~~/g, "<del>$1</del>");
-  html = html.replace(/\*\*\*([^*]+)\*\*\*/g, "<strong><em>$1</em></strong>");
-  html = html.replace(/___([^_]+)___/g, "<strong><em>$1</em></strong>");
+// نظام عرض ملحوظات الفصل وتحويل النصوص إلى Markdown آمن.
+function escapeMarkdownHTML(value) {
+  return escapeHTML(value);
+}
+
+function renderInlineMarkdown(text) {
+  let html = escapeMarkdownHTML(text);
+  html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
+  html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
   html = html.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
   html = html.replace(/__([^_]+)__/g, "<strong>$1</strong>");
   html = html.replace(/\*([^*]+)\*/g, "<em>$1</em>");
-  html = html.replace(/_([^_]+)_/g, "<em>$1</em>");
-
-  html = html.replace(/\u0000(\d+)\u0000/g, (_, index) => placeholders[Number(index)]);
-  html = html.replace(/\n/g, "<br>");
   return html;
 }
 
-/*
-  استبدل هذا الجزء بمحتوى صفحة الملاحظات.
-  تأكد من أن تكون العناصر الموجودة في الصفحة متوافقة مع الشيفرة المستخدمة هنا.
-*/
-async function discoverMarkdownFiles() {
-  return MARKDOWN_NOTES.map(note => ({
-    filename: note.filename,
-    name: note.name,
-    title: note.title,
-    description: note.description,
-    slug: note.slug,
-    sharePath: note.sharePath,
-    url: note.url
-  }));
+function renderMarkdown(markdown) {
+  const lines = markdown.replace(/\r\n?/g, "\n").split("\n");
+  let html = "";
+  let listStack = [];
+  let inBlockquote = false;
+  let paragraph = [];
+
+  const closeParagraph = () => {
+    if (paragraph.length) {
+      html += `<p>${renderInlineMarkdown(paragraph.join(" "))}</p>`;
+      paragraph = [];
+    }
+  };
+
+  const closeLists = () => {
+    while (listStack.length) {
+      html += "</li></ul>";
+      listStack.pop();
+    }
+  };
+
+  for (let index = 0; index < lines.length; index++) {
+    const line = lines[index];
+
+    if (!line.trim()) {
+      closeParagraph();
+      closeLists();
+      if (inBlockquote) {
+        html += "</blockquote>";
+        inBlockquote = false;
+      }
+      continue;
+    }
+
+    const heading = line.match(/^ {0,3}(#{1,6})\s+(.*)$/);
+    if (heading) {
+      closeParagraph();
+      closeLists();
+      const level = heading[1].length;
+      html += `<h${level}>${renderInlineMarkdown(heading[2])}</h${level}>`;
+      continue;
+    }
+
+    if (/^ {0,3}>/.test(line)) {
+      closeParagraph();
+      closeLists();
+      if (!inBlockquote) {
+        html += '<blockquote>';
+        inBlockquote = true;
+      }
+      html += `<p>${renderInlineMarkdown(line.replace(/^ {0,3}>\s?/, ""))}</p>`;
+      continue;
+    }
+
+    const listItem = line.match(/^\s*([-*])\s+(.+)$/);
+    if (listItem) {
+      closeParagraph();
+      if (!listStack.length) {
+        html += "<ul>";
+        listStack.push(0);
+      }
+      html += `<li>${renderInlineMarkdown(listItem[2])}`;
+      continue;
+    }
+
+    const orderedItem = line.match(/^\s*\d+[.)]\s+(.+)$/);
+    if (orderedItem) {
+      closeParagraph();
+      closeLists();
+      if (!listStack.length) {
+        html += "<ol>";
+        listStack.push(1);
+      }
+      html += `<li>${renderInlineMarkdown(orderedItem[1])}`;
+      continue;
+    }
+
+    if (inBlockquote) {
+      html += `<p>${renderInlineMarkdown(line.trim())}</p>`;
+    } else {
+      paragraph.push(line.trim());
+    }
+  }
+
+  closeParagraph();
+  closeLists();
+  if (inBlockquote) html += "</blockquote>";
+  return html;
 }
 
+const notesPanel = $("#notesPanel");
 const notesEmpty = $("#notesEmpty");
 const notesBrowser = $("#notesBrowser");
+const notesSidebar = $("#notesSidebar");
 const notesList = $("#notesList");
 const markdownViewer = $("#markdownViewer");
-const notesSidebar = $("#notesSidebar");
-
-async function openMarkdownNote(note) {
-  if (!note || !markdownViewer) return;
-
-  markdownViewer.setAttribute("aria-busy", "true");
-  try {
-    const response = await fetch(note.url, { cache: "no-store" });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const markdown = await response.text();
-    markdownViewer.innerHTML = markdownToHTML(markdown);
-  } catch (error) {
-    console.warn("تعذر فتح الملاحظة:", error);
-    markdownViewer.innerHTML = '<p class="notes-error">خربت شوية، معرفناش نفتح الملحوظة دي.</p>';
-  } finally {
-    markdownViewer.removeAttribute("aria-busy");
-  }
-}
-
 const noteActions = $("#noteActions");
 const shareNoteButton = $("#shareNoteButton");
 const copyNoteButton = $("#copyNoteButton");
 
-function setSocialMetadata(note) {
-  if (!note) return;
+let activeNoteIndex = 0;
 
-  document.title = `${note.title} | ملحوظات فصلنا 1\\3`;
-
-  const description = document.querySelector('meta[name="description"]');
-  if (description) description.setAttribute("content", note.description);
-
-  const canonicalUrl = new URL(window.location.href);
-  canonicalUrl.searchParams.set("note", note.slug);
-  canonicalUrl.hash = "";
-
-  const tags = {
-    "og:title": `${note.title} | ملحوظات الفصل`,
-    "og:description": note.description,
-    "og:url": canonicalUrl.href,
-    "og:type": "article",
-    "og:site_name": "فصلنا 1\\3",
-    "twitter:card": "summary",
-    "twitter:title": `${note.title} | ملحوظات الفصل`,
-    "twitter:description": note.description
-  };
-
-  Object.entries(tags).forEach(([property, content]) => {
-    let tag = document.querySelector(`meta[property="${property}"]`) || document.querySelector(`meta[name="${property}"]`);
-    if (!tag) {
-      tag = document.createElement("meta");
-      if (property.startsWith("og:") || property === "article:") tag.setAttribute("property", property);
-      else tag.setAttribute("name", property);
-      document.head.appendChild(tag);
-    }
-    tag.setAttribute("content", content);
-  });
-
-  let canonical = document.querySelector('link[rel="canonical"]');
-  if (!canonical) {
-    canonical = document.createElement("link");
-    canonical.rel = "canonical";
-    document.head.appendChild(canonical);
-  }
-  canonical.href = canonicalUrl.href;
-}
-
-function noteShareUrl(note) {
+function noteShareURL(note) {
   const url = new URL(window.location.href);
-  url.pathname = url.pathname.replace(/[^/]*$/, note.sharePath);
   url.search = "";
   url.hash = "";
+  url.searchParams.set("note", note.slug);
   return url.href;
 }
 
-async function copyText(text) {
-  if (navigator.clipboard && window.isSecureContext) {
-    await navigator.clipboard.writeText(text);
+async function selectNote(note, index = activeNoteIndex) {
+  if (!note || !markdownViewer) return;
+  activeNoteIndex = Number(index) || 0;
+
+  $$(".notes-list-item", notesList).forEach((button, buttonIndex) => {
+    const isActive = buttonIndex === activeNoteIndex;
+    button.classList.toggle("active", isActive);
+    button.setAttribute("aria-current", isActive ? "true" : "false");
+  });
+
+  markdownViewer.innerHTML = '<p style="text-align:center;opacity:.65">جاري تحميل الملحوظة...</p>';
+
+  try {
+    const response = await fetch(note.url);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const markdown = await response.text();
+    markdownViewer.innerHTML = renderMarkdown(markdown);
+
+    document.title = `${note.title} | ملحوظات الفصل`;
+    const url = noteShareURL(note);
+    history.replaceState(null, "", `${window.location.pathname}?note=${encodeURIComponent(note.slug)}`);
+
+    if (shareNoteButton) {
+      shareNoteButton.onclick = async () => {
+        if (navigator.share) {
+          try {
+            await navigator.share({ title: note.title, text: note.description, url });
+          } catch (error) {
+            if (error.name !== "AbortError") console.warn("تعذر المشاركة", error);
+          }
+        } else {
+          window.open(url, "_blank", "noopener,noreferrer");
+        }
+      };
+    }
+
+    if (copyNoteButton) {
+      copyNoteButton.onclick = async () => {
+        try {
+          await navigator.clipboard.writeText(url);
+          copyNoteButton.textContent = "تم نسخ الرابط";
+        } catch (_) {
+          window.prompt("انسخ رابط الملحوظة", url);
+        }
+        window.setTimeout(() => { copyNoteButton.textContent = "نسخ الرابط"; }, 1800);
+      };
+    }
+  } catch (error) {
+    markdownViewer.innerHTML = '<p>تعذر تحميل الملحوظة. حاول تحديث الصفحة.</p>';
+    console.warn("تعذر تحميل الملحوظة", note.url, error);
+  }
+}
+
+async function setupNotesPage() {
+  if (!notesPanel || !notesBrowser) return;
+
+  const availableNotes = await Promise.all(MARKDOWN_NOTES.map(async note => {
+    try {
+      const response = await fetch(note.url);
+      return response.ok ? note : null;
+    } catch (_) {
+      return null;
+    }
+  }));
+
+  const notes = availableNotes.filter(Boolean);
+  if (!notes.length) {
+    if (notesEmpty) notesEmpty.hidden = false;
+    notesBrowser.hidden = true;
     return;
   }
 
-  const input = document.createElement("textarea");
-  input.value = text;
-  input.style.position = "fixed";
-  input.style.opacity = "0";
-  document.body.appendChild(input);
-  input.select();
-  document.execCommand("copy");
-  input.remove();
-}
+  if (notesEmpty) notesEmpty.hidden = true;
+  notesBrowser.hidden = false;
+  if (noteActions) noteActions.hidden = false;
 
-function showShareFeedback(button, successText) {
-  const original = button.textContent;
-  button.textContent = successText;
-  window.setTimeout(() => { button.textContent = original; }, 1800);
-}
+  if (notesList) {
+    notesList.innerHTML = notes.map((note, index) =>
+      `<button type="button" class="notes-list-item" role="listitem" data-note-index="${index}" aria-current="false">${escapeHTML(note.name)}</button>`
+    ).join("");
 
-async function shareCurrentNote(note) {
-  if (!note) return;
-  const url = noteShareUrl(note);
-  const shareData = { title: note.title, text: note.description, url };
-
-  try {
-    if (navigator.share) {
-      await navigator.share(shareData);
-    } else {
-      await copyText(url);
-      showShareFeedback(shareNoteButton, "اتنسخ الرابط ✓");
-    }
-  } catch (error) {
-    if (error.name !== "AbortError") {
-      console.warn("تعذر مشاركة الملحوظة:", error);
-      await copyText(url);
-      showShareFeedback(shareNoteButton, "اتنسخ الرابط ✓");
-    }
+    notesList.addEventListener("click", event => {
+      const button = event.target.closest("[data-note-index]");
+      if (!button) return;
+      selectNote(notes[Number(button.dataset.noteIndex)], Number(button.dataset.noteIndex));
+    });
   }
+
+  const requestedSlug = new URL(window.location.href).searchParams.get("note");
+  const requestedIndex = notes.findIndex(note => note.slug === requestedSlug);
+  const initialIndex = requestedIndex >= 0 ? requestedIndex : 0;
+  selectNote(notes[initialIndex], initialIndex);
 }
 
-if (shareNoteButton) shareNoteButton.addEventListener("click", () => {
-  if (window.activeSharedNote) shareCurrentNote(window.activeSharedNote);
-});
-
-if (copyNoteButton) copyNoteButton.addEventListener("click", async () => {
-  if (!window.activeSharedNote) return;
-  try {
-    await copyText(noteShareUrl(window.activeSharedNote));
-    showShareFeedback(copyNoteButton, "اتنسخ ✓");
-  } catch (error) {
-    console.warn("تعذر نسخ الرابط:", error);
-  }
-});
-
-if (notesEmpty && notesBrowser) {
-  discoverMarkdownFiles().then(notes => {
-    if (!notes.length) {
-      notesEmpty.hidden = false;
-      notesBrowser.hidden = true;
-      return;
-    }
-
-    notesEmpty.hidden = true;
-    notesBrowser.hidden = false;
-
-    if (noteActions) noteActions.hidden = false;
-
-    const selectNote = (note, index, updateUrl = true) => {
-      window.activeSharedNote = note;
-      setSocialMetadata(note);
-      openMarkdownNote(note);
-
-      $$(".notes-list-item", notesList).forEach((button, buttonIndex) => {
-        const active = buttonIndex === index;
-        button.classList.toggle("active", active);
-        button.setAttribute("aria-pressed", String(active));
-      });
-
-      if (updateUrl) {
-        const url = new URL(window.location.href);
-        url.searchParams.set("note", note.slug);
-        window.history.replaceState({}, "", url);
-      }
-    };
-
-    if (notes.length === 1) {
-      if (notesSidebar) notesSidebar.hidden = true;
-      notesBrowser.classList.add("single-note");
-    } else {
-      if (notesSidebar) notesSidebar.hidden = false;
-      notesBrowser.classList.remove("single-note");
-
-      if (notesList) {
-        notesList.innerHTML = notes.map((note, index) =>
-          `<button type="button" class="notes-list-item${index === 0 ? " active" : ""}" role="listitem" data-note-index="${index}" aria-pressed="${index === 0}">${escapeHTML(note.name)}</button>`
-        ).join("");
-
-        notesList.addEventListener("click", event => {
-          const item = event.target.closest("[data-note-index]");
-          if (!item) return;
-          selectNote(notes[Number(item.dataset.noteIndex)], Number(item.dataset.noteIndex));
-        });
-      }
-    }
-
-    const requestedSlug = new URL(window.location.href).searchParams.get("note");
-    const requestedIndex = notes.findIndex(note => note.slug === requestedSlug);
-    const initialIndex = requestedIndex >= 0 ? requestedIndex : 0;
-    selectNote(notes[initialIndex], initialIndex);
-  });
-}
+setupNotesPage();

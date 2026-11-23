@@ -15,7 +15,11 @@
   <meta name="twitter:description" content="الموضوع المقترح للإذاعة هو الفلسفة، وأهميتها وأسئلة يمكن أن تشعل النقاش.">
   <meta name="twitter:image" content="https://jyujtj.github.io/owlatalet/baner.png">
   <meta http-equiv="refresh" content="0; url=../../notes.html?note=radio-announcement">
-  <script>location.replace('../../notes.html?note=radio-announcement');</script>
+  <script>
+    const destination = new URL('../../notes.html', window.location.href);
+    destination.searchParams.set('note', 'radio-announcement');
+    location.replace(destination.href);
+  </script>
 </head>
 <body></body>
 </html>

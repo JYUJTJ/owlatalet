@@ -15,7 +15,11 @@
   <meta name="twitter:description" content="ملحوظة مهمة للحفاظ على نظافة الفصل وترتيبه ومسؤولية كل طالب فيه.">
   <meta name="twitter:image" content="https://jyujtj.github.io/owlatalet/baner.png">
   <meta http-equiv="refresh" content="0; url=../../notes.html?note=keep-the-classroom">
-  <script>location.replace('../../notes.html?note=keep-the-classroom');</script>
+  <script>
+    const destination = new URL('../../notes.html', window.location.href);
+    destination.searchParams.set('note', 'keep-the-classroom');
+    location.replace(destination.href);
+  </script>
 </head>
 <body></body>
 </html>
